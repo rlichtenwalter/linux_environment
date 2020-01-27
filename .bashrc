@@ -88,6 +88,7 @@ export INFOPATH=
 
 ## ALIASES
 #-------------------------------------------------
+alias ls="ls --color"
 alias view="vim -R"
 
 

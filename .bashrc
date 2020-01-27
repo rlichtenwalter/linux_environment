@@ -161,17 +161,19 @@ function refresh_bashrc {
 	workingdir="$(mktemp -d)"
 	zipfile="$workingdir/master.zip"
 	bashrcfile="$workingdir/linux_environment-master/.bashrc"
-	curl -s -S -L https://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile"
-	unzip -q -u -d "$workingdir" "$zipfile"
-	start=$(< "$bashrcfile" grep -n '^## ENVIRONMENT-SPECIFIC DEFINITIONS' | cut -d ':' -f 1)
-	end=$(< "$bashrcfile" grep -n '^## RESUME NORMAL HISTORY RECORDING' | cut -d ':' -f 1)
 	patchedbashrcfile="$workingdir/.bashrc"
-	< "$bashrcfile" head -n $(($start-1)) >> "$patchedbashrcfile"
-	patch="$(< ~/.bashrc sed -n -e '/^## ENVIRONMENT-SPECIFIC DEFINITIONS/,/^## RESUME NORMAL HISTORY RECORDING/p;/^## RESUME NORMAL HISTORY RECORDING/q')"
-	printf "%s\n" "$patch" >> "$patchedbashrcfile"
-	< "$bashrcfile" tail -n +$(($end+1)) >> "$patchedbashrcfile"
+	curl -s -S -L https://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile" 2>&1 | grep -v 'curl: (35) SSL connect error' || curl -s -S -L http://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile"
+	test $? -eq 0 && unzip -q -u -d "$workingdir" "$zipfile"
+	if [ -f "$bashrcfile" ] ; then
+		start=$(< "$bashrcfile" grep -n '^## ENVIRONMENT-SPECIFIC DEFINITIONS' | cut -d ':' -f 1)
+		end=$(< "$bashrcfile" grep -n '^## RESUME NORMAL HISTORY RECORDING' | cut -d ':' -f 1)
+		< "$bashrcfile" head -n $(($start-1)) >> "$patchedbashrcfile"
+		patch="$(< ~/.bashrc sed -n -e '/^## ENVIRONMENT-SPECIFIC DEFINITIONS/,/^## RESUME NORMAL HISTORY RECORDING/p;/^## RESUME NORMAL HISTORY RECORDING/q')"
+		printf "%s\n" "$patch" >> "$patchedbashrcfile"
+		< "$bashrcfile" tail -n +$(($end+1)) >> "$patchedbashrcfile"
+	fi
 	mv "$patchedbashrcfile" ~/.bashrc
-	test ! -z "$var" || rm -rf "$workingdir"
+	test -z "$var" && rm -rf "$workingdir"
 	source ~/.bashrc
 }
 

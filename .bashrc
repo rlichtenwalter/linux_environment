@@ -172,10 +172,26 @@ function refresh_bashrc {
 		patch="$(< ~/.bashrc sed -n -e '/^## ENVIRONMENT-SPECIFIC DEFINITIONS/,/^## RESUME NORMAL HISTORY RECORDING/p;/^## RESUME NORMAL HISTORY RECORDING/q')"
 		printf "%s\n" "$patch" >> "$patchedbashrcfile"
 		< "$bashrcfile" tail -n +$(($end+1)) >> "$patchedbashrcfile"
+		mv "$patchedbashrcfile" ~/.bashrc
+		source ~/.bashrc
 	fi
-	mv "$patchedbashrcfile" ~/.bashrc
-	test -z "$var" && rm -rf "$workingdir"
-	source ~/.bashrc
+	test -z "$workingdir" && rm -rf "$workingdir"
+}
+
+function refresh_vimrc {
+	if [ $# -ne 0 ] ; then
+		printf "no required arguments\n" >&2
+		return 1
+	fi
+	workingdir="$(mktemp -d)"
+	zipfile="$workingdir/master.zip"
+	vimrcfile="$workingdir/linux_environment-master/.vimrc"
+	curl -s -S -L https://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile" 2> /dev/null || curl -s -S -L http://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile"
+	test $? -eq 0 && unzip -q -u -d "$workingdir" "$zipfile"
+	if [ -f "$vimrcfile" ] ; then
+		mv "$vimrcfile" ~/.vimrc
+	fi
+	test -z "$workingdir" && rm -rf "$workingdir"
 }
 
 function index_of {

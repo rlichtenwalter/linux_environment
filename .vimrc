@@ -15,6 +15,20 @@ set nowrap
 set incsearch
 set hlsearch
 set synmaxcol=8192
+set viminfo='100,\"100,:1000,%,n~/.viminfo
+
+" function to restore cursor position
+function! ResCur()
+    if line("'\"") <= line("$")
+        normal! g`"
+        return 1
+    endif
+endfunction
+
+augroup resCur
+    autocmd!
+    autocmd BufWinEnter * call ResCur()
+augroup END
 
 " don't automatically add problematic linebreaks at the end of PHP files
 autocmd FileType php setlocal noeol binary

@@ -162,7 +162,7 @@ function refresh_bashrc {
 	zipfile="$workingdir/master.zip"
 	bashrcfile="$workingdir/linux_environment-master/.bashrc"
 	patchedbashrcfile="$workingdir/.bashrc"
-	curl -s -S -L https://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile" 2>&1 | grep -v 'curl: (35) SSL connect error' || curl -s -S -L http://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile"
+	curl -s -S -L https://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile" 2> /dev/null || curl -s -S -L http://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile"
 	test $? -eq 0 && unzip -q -u -d "$workingdir" "$zipfile"
 	if [ -f "$bashrcfile" ] ; then
 		start=$(< "$bashrcfile" grep -n '^## ENVIRONMENT-SPECIFIC DEFINITIONS' | cut -d ':' -f 1)

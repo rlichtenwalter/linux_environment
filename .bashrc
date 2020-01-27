@@ -177,7 +177,6 @@ function refresh_bashrc {
 	source ~/.bashrc
 }
 
-
 function index_of {
 	if [ $# -ne 1 ] ; then
 		printf "required argument: <colname>\n" >&2

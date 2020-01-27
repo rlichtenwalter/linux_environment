@@ -120,7 +120,7 @@ function prompt_command {
 	echo ""
 	jobCount=$(jobs | wc -l | tr -d " ")
 	procCount=$(($(ps -ef | grep -w $i_am | wc -l | tr -d " ")-1))
-	promptSize=$(echo -n "Shell: bash v${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}.${BASH_VERSINFO[2]} - Jobs: ${jobCount} - Processes: ${procCount}Exit Status: $exit_status - Elapsed: ${elapsed}s - Date: Sun Jan 01 - Time: HH:MM:SS" | wc -c | tr -d " ")
+	promptSize=$(echo -n "Shell: bash v${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}.${BASH_VERSINFO[2]} - Jobs: ${jobCount} - Exit Status: ${exit_status}Elapsed: ${elapsed}s - Date: Sun Jan 01 - Time: HH:MM:SS" | wc -c | tr -d " ")
 	if test "$COLUMNS" = "" ; then
 		export COLUMNS=80;
 	fi
@@ -130,10 +130,8 @@ function prompt_command {
 	PS1="${PS1}${FG_GRAY} - ";
 	PS1="${PS1}${FG_GREEN}Jobs: ${jobCount}";
 	PS1="${PS1}${FG_GRAY} - ";
-	PS1="${PS1}${FG_GREEN}Processes: ${procCount}";
-	PS1="${PS1}${FG_GRAY}${fill}";
 	PS1="${PS1}${FG_GREEN}Exit Status: $exit_status";
-	PS1="${PS1}${FG_GRAY} - ";
+	PS1="${PS1}${FG_GRAY}${fill}";
 	PS1="${PS1}${FG_GREEN}Elapsed: ${elapsed}s";
 	PS1="${PS1}${FG_GRAY} - ";
 	PS1="${PS1}${FG_GREEN}Date: \d";
@@ -154,6 +152,29 @@ function prompt_command {
 	PS1="${PS1}${FG_LIGHT_GRAY} ";
 	export PS1
 }
+
+function refresh_bashrc {
+	if [ $# -ne 0 ] ; then
+		printf "no required arguments\n" >&2
+		return 1
+	fi
+	workingdir="$(mktemp -d)"
+	zipfile="$workingdir/master.zip"
+	bashrcfile="$workingdir/linux_environment-master/.bashrc"
+	curl -s -S -L https://github.com/rlichtenwalter/linux_environment/archive/master.zip > "$zipfile"
+	unzip -q -u -d "$workingdir" "$zipfile"
+	start=$(< "$bashrcfile" grep -n '^## ENVIRONMENT-SPECIFIC DEFINITIONS' | cut -d ':' -f 1)
+	end=$(< "$bashrcfile" grep -n '^## RESUME NORMAL HISTORY RECORDING' | cut -d ':' -f 1)
+	patchedbashrcfile="$workingdir/.bashrc"
+	< "$bashrcfile" head -n $(($start-1)) >> "$patchedbashrcfile"
+	patch="$(< ~/.bashrc sed -n -e '/^## ENVIRONMENT-SPECIFIC DEFINITIONS/,/^## RESUME NORMAL HISTORY RECORDING/p;/^## RESUME NORMAL HISTORY RECORDING/q')"
+	printf "%s\n" "$patch" >> "$patchedbashrcfile"
+	< "$bashrcfile" tail -n +$(($end+1)) >> "$patchedbashrcfile"
+	mv "$patchedbashrcfile" ~/.bashrc
+	test ! -z "$var" || rm -rf "$workingdir"
+	source ~/.bashrc
+}
+
 
 function index_of {
 	if [ $# -ne 1 ] ; then

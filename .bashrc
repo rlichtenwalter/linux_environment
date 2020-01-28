@@ -176,7 +176,7 @@ function refresh_bashrc {
 		source ~/.bashrc
 	fi
 	test -z "$workingdir" && rm -rf "$workingdir"
-	return $((! $?)
+	return $((! $?))
 }
 
 function refresh_vimrc {
@@ -193,7 +193,7 @@ function refresh_vimrc {
 		mv "$vimrcfile" ~/.vimrc
 	fi
 	test -z "$workingdir" && rm -rf "$workingdir"
-	return $((! $?)
+	return $((! $?))
 }
 
 function index_of {
